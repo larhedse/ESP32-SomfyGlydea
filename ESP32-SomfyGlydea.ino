@@ -7,8 +7,8 @@
 
 #include <ESP32-Secrets.h>
 
-#define GPIO_CLOSE 2
-#define GPIO_OPEN 3
+#define GPIO_OPEN 2
+#define GPIO_CLOSE 3
 #define GPIO_MYPOSITION 18
 
 #define CURTAIN_UNKNOWN 0
@@ -51,8 +51,8 @@ void setup() {
 
   server.on("/", handlewebpage_root);
   server.on("/status", handlewebpage_status);
-  server.on("/close", handlewebpage_close);
   server.on("/open", handlewebpage_open);
+  server.on("/close", handlewebpage_close);
   server.on("/myposition", handlewebpage_myposition);
   server.begin();
   httpUpdater.setup(&server, ota_path, ota_username, ota_password);
@@ -69,24 +69,7 @@ void loop() {
 // -------------------------------------------------------------------
 void handlewebpage_root() {
 
-  SendHTML((curtain_status == CURTAIN_CLOSE), (curtain_status == CURTAIN_OPEN), (curtain_status == CURTAIN_MYPOSITION));
-}
-
-// -------------------------------------------------------------------
-void handlewebpage_close() {
-
-  curtain_status = CURTAIN_CLOSE;
-  EEPROM.write(0, curtain_status);
-  EEPROM.commit();
-
-  pinMode(GPIO_OPEN, INPUT);
-  pinMode(GPIO_MYPOSITION, INPUT);
-  pinMode(GPIO_CLOSE, OUTPUT);
-  digitalWrite(GPIO_CLOSE, LOW);
-  delay(200);
-  pinMode(GPIO_CLOSE, INPUT);
-
-  SendHTML(true, false, false);
+  SendHTML((curtain_status == CURTAIN_OPEN), (curtain_status == CURTAIN_CLOSE), (curtain_status == CURTAIN_MYPOSITION));
 }
 
 // -------------------------------------------------------------------
@@ -103,7 +86,24 @@ void handlewebpage_open() {
   delay(200);
   pinMode(GPIO_OPEN, INPUT);
 
-  SendHTML(false, true, false);
+  SendHTML((curtain_status == CURTAIN_OPEN), (curtain_status == CURTAIN_CLOSE), (curtain_status == CURTAIN_MYPOSITION));
+}
+
+// -------------------------------------------------------------------
+void handlewebpage_close() {
+
+  curtain_status = CURTAIN_CLOSE;
+  EEPROM.write(0, curtain_status);
+  EEPROM.commit();
+
+  pinMode(GPIO_OPEN, INPUT);
+  pinMode(GPIO_MYPOSITION, INPUT);
+  pinMode(GPIO_CLOSE, OUTPUT);
+  digitalWrite(GPIO_CLOSE, LOW);
+  delay(200);
+  pinMode(GPIO_CLOSE, INPUT);
+
+  SendHTML((curtain_status == CURTAIN_OPEN), (curtain_status == CURTAIN_CLOSE), (curtain_status == CURTAIN_MYPOSITION));
 }
 
 // -------------------------------------------------------------------
@@ -120,21 +120,21 @@ void handlewebpage_myposition() {
   delay(200);
   pinMode(GPIO_MYPOSITION, INPUT);
 
-  SendHTML(false, false, true);
+  SendHTML((curtain_status == CURTAIN_OPEN), (curtain_status == CURTAIN_CLOSE), (curtain_status == CURTAIN_MYPOSITION));
 }
 
 // -------------------------------------------------------------------
 void handlewebpage_status() {
 
-  if (curtain_status == CURTAIN_CLOSE) { snprintf(webpage, WEBPAGESIZE, "<!DOCTYPE HTML><html><body>Close</body></html>"); }
-  if (curtain_status == CURTAIN_OPEN) { snprintf(webpage, WEBPAGESIZE, "<!DOCTYPE HTML><html><body>Open</body></html>"); }
-  if (curtain_status == CURTAIN_MYPOSITION) { snprintf(webpage, WEBPAGESIZE, "<!DOCTYPE HTML><html><body>MyPosition</body></html>"); }
+  if (curtain_status == CURTAIN_OPEN) { snprintf(webpage, WEBPAGESIZE, "<!DOCTYPE HTML><html>Open</html>"); }
+  if (curtain_status == CURTAIN_CLOSE) { snprintf(webpage, WEBPAGESIZE, "<!DOCTYPE HTML><html>Close</html>"); }
+  if (curtain_status == CURTAIN_MYPOSITION) { snprintf(webpage, WEBPAGESIZE, "<!DOCTYPE HTML><html>MyPosition</html>"); }
 
   server.send(200, "text/html", webpage);
 }
 
 // -------------------------------------------------------------------
-void SendHTML(uint8_t close, uint8_t open, uint8_t myposition) {
+void SendHTML(uint8_t open, uint8_t close, uint8_t myposition) {
 
   snprintf(webpage, WEBPAGESIZE, " \
   <!DOCTYPE html> <html> \
@@ -152,9 +152,9 @@ void SendHTML(uint8_t close, uint8_t open, uint8_t myposition) {
   </head> \
   <body> \
   <h1><a href=""/"">Curtain Web Server</a></h1> \
-  <a class=\"button button-%d\" href=\"/close\">Close</a> \
   <a class=\"button button-%d\" href=\"/open\">Open</a> \
+  <a class=\"button button-%d\" href=\"/close\">Close</a> \
   <a class=\"button button-%d\" href=\"/myposition\">My Position</a> \
-  </body></html>\n", close, open, myposition);
+  </body></html>\n", open, close, myposition);
   server.send(200, "text/html", webpage);
 }
