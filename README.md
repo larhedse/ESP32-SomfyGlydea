@@ -24,4 +24,37 @@ And the solder a small jumper wire between two pins on the reverse side to give 
 
 All this can be done with just pushing the small board out of the housing for the electric motor. This small board sits on the end with the RJ12 connector - but you will need to open both ends - and be aware of the spring that is loaded on the engine side. It likes to pop out...
 
-When the above work is done, then just open up Arduino and download the code I written. Feel free to do any sort of modification, there is no right or wrong here - just keep exploring!
+When the above work is done, then just open up Arduino and download the code I written.
+
+Remeber to change SID and stuff in the file ESP32-Secrets.h - without changes it will not work...
+
+There are two ways to control the ESP32-C6 board, and therefor control the Glydea motor: Either use a web browser and point it to the IP adress that it has (look it up in your DHCP leases), or you can use something simple as URL calls, like (whis is in my case stored under shell_command in configure.yaml for Home Assistant):
+
+  somfy_open: "curl http://xxx.xxx.xxx.xxx/open"
+  somfy_close: "curl http://xxx.xxx.xxx.xxx/close"
+  somfy_myposition: "curl http://xxx.xxx.xxx.xxx/myposition"
+  somfy_status: "curl http://xxx.xxx.xxx.xxx/status"
+
+The last command shows current status as in what command that was last transmitted. The Glydea motor I have developed this on does not have any sensor for telling where the curtain is (open/closed and so on), so the only way to keep track is by storing the last transmitted command, which is a work-around I guess. Anyway it is stored in EEPROM so even after power failure it will remember what command (where it is) used. So it will be practilay the same?
+
+There is a way to add this as a sensor in Home Assistant:
+
+  - platform: rest
+    resource: http://xxx.xxx.xxx.xxx/status
+    name: <something usefull>
+    value_template: >
+        {%- if value[21:25] == 'Open' -%} Open
+        {%- elif value[21:25] == 'Clos' -%} Closed
+        {%- elif value[21:25] == 'MyPo' -%} My Position
+        {%- else -%} Offline
+        {%- endif -%}
+    icon: >
+        {%- if value[21:25] == 'Open' -%} mdi:curtains
+        {%- elif value[21:25] == 'Clos' -%} mdi:curtains-closed
+        {%- elif value[21:25] == 'MyPo' -%} mdi:star
+        {%- else -%} Offline
+        {%- endif -%}
+
+And if you like to do an OTA update of firmware (after the initial load, which has to be over USB), then just use "http://xxx.xxx.xxx.xxx/update".
+
+Feel free to do any sort of modification, there is no right or wrong here - just keep exploring!
