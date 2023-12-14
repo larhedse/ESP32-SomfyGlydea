@@ -28,7 +28,10 @@ When the above work is done, then just open up Arduino and download the code I w
 
 Remeber to change SID and stuff in the file ESP32-Secrets.h - without changes it will not work...
 
-There are two ways to control the ESP32-C6 board, and therefor control the Glydea motor: Either use a web browser and point it to the IP adress that it has (look it up in your DHCP leases), or you can use something simple as URL calls, like (whis is in my case stored under shell_command in configure.yaml for Home Assistant):
+There are two ways to control the ESP32-C6 board, and therefor control the Glydea motor: Either use a web browser and point it to the IP adress that it has (look it up in your DHCP leases):
+![Curtain WEB Server](https://github.com/larhedse/ESP32-SomfyGlydea/assets/8342357/003b543a-4819-416f-8295-1a648f51f419)
+
+Or you can use something simple as URL calls, like (whis is in my case stored under shell_command in configure.yaml for Home Assistant):
 ```
   somfy_open: "curl http://xxx.xxx.xxx.xxx/open"
   somfy_close: "curl http://xxx.xxx.xxx.xxx/close"
