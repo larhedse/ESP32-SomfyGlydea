@@ -39,7 +39,7 @@ Or you can use something simple as URL calls, like (whis is in my case stored un
   somfy_myposition: "curl http://xxx.xxx.xxx.xxx/myposition"
   somfy_status: "curl http://xxx.xxx.xxx.xxx/status"
 ```
-The last command shows current status as in what command that was last transmitted. The Glydea motor I have developed this on does not have any sensor for telling where the curtain is (open/closed and so on), so the only way to keep track is by storing the last transmitted command, which is a work-around I guess. Anyway it is stored in EEPROM so even after power failure it will remember what command (where it is) used. So it will be practilay the same?
+The last command shows current status as in what command that was last transmitted. The Glydea motor I have developed this on does not have any sensor for telling where the curtain is (open/closed and so on), so the only way to keep track is by storing the last transmitted command, which is a work-around I guess. Anyway it is stored in EEPROM so even after power failure it will remember what command (where it is) used. So it will be practically the same?
 
 There is a way to add this as a sensor in Home Assistant:
 ```
